@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE wml PUBLIC "-//WAPFORUM//DTD WML 1.1//EN" "http://www.wapforum.org/DTD/wml_1.1.xml">
+<wml>
+ <head>
+  <meta content="max-age=0" http-equiv="Cache-Control"/>
+ </head>
+ <card id="userinfo.php" title="轻小说文库 - 用户信息">
+  <p>
+   您好!
+   <a href="http://www.wenku8.com/wap/userinfo.php?id=530523">
+    lancetest
+   </a>
+   ,
+   <a href="http://www.wenku8.com/wap/logout.php" title="链接">
+    退出
+   </a>
+   <br/>
+   <a href="http://www.wenku8.com/wap/" title="首页">
+    首页
+   </a>
+   .
+   <a href="http://www.wenku8.com/wap/message.php?box=inbox">
+    消息
+   </a>
+   .
+   <a href="http://www.wenku8.com/wap/article/bookcase.php">
+    书架
+   </a>
+   .
+   <a href="http://www.wenku8.com/wap/article/search.php" title="搜书">
+    搜书
+   </a>
+   <br/>
+   <a href="http://www.wenku8.com/wap/article/sort.php" title="分类">
+    分类
+   </a>
+   .
+   <a href="http://www.wenku8.com/wap/article/top.php" title="排行">
+    排行
+   </a>
+   .
+   <a href="http://www.wenku8.com/wap/article/sortlist.php?fullflag=1">
+    全本
+   </a>
+   .
+   <a href="http://www.wenku8.com/wap/article/toplist.php?sort=postdate">
+    新书
+   </a>
+   <br/>
+   【用户信息】
+   <br/>
+   I D：530523
+   <br/>
+   用户：lancetest
+   <br/>
+   昵称：lancetest
+   <br/>
+   注册：2019-07-22
+   <br/>
+   积分：11
+   <br/>
+   等级：普通会员-新手上路
+   <br/>
+   性别：男
+   <br/>
+   邮箱：1352040930@qq.com
+   <br/>
+   Q Q：1352040930
+   <br/>
+   简介：
+   <br/>
+   <p align="center">
+    <a href="http://www.wenku8.com/wap/newmessage.php?tosys=1">
+     联系管理员
+    </a>
+    <br/>
+    (c) 轻小说文库
+    <br/>
+    <a href="https://www.wenku8.net">
+     进入电脑版文库
+    </a>
+   </p>
+   <img height="0" src="" width="0"/>
+   <img height="0" src="http://c.cnzz.com/wapstat.php?siteid=1254174784&amp;r=&amp;rnd=572651908" width="0"/>
+  </p>
+ </card>
+</wml>

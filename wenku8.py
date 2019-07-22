@@ -7,6 +7,10 @@ import copy
 
 class Wenku8:
 
+    class NoCopyright(BaseException):
+        def __init__(self, *args, **kwargs):
+            pass
+
     def __init__(self):
         self.cookie = {}
 
@@ -33,7 +37,6 @@ class Wenku8:
         soup = Soup(html.content, 'html.parser')
         text = soup.getText()
         # print(text)
-        result = {}
         try:
             uid = int(re.findall('I D：[0-9]{1,7}', text)[0][4:])
             username = re.findall('用户：.*', text)[0][3:-1]
@@ -73,13 +76,19 @@ class Wenku8:
         # print(text)
 
         try:
+            if '因版权问题，文库不再提供该小说的在线阅读与下载服务' in text:
+                raise self.NoCopyright
             author = soup.find_all('anchor')[0].get_text()
             sortlist = Soup(re.findall('<a href="sortlist.php.+?/>', html)[0], 'html.parser').get_text()
+            # brief = print(re.findall('\[作品简介\][\s\D]*联系管理员', text)[0][8:-7])
+            if bid == 15:
+                # print(re.findall('\[作品简介\][\s\D]*联系管理员', text))
+                # text = Soup(text, 'html.parser').get_text()
+                print(text)
+            brief = re.findall('\[作品简介\][\s\D]*联系管理员', text)[0][8:-7]
+            has_copyright = True
             status = re.findall('状态:.*', text)[0][3:].replace('\r', '')
             size = re.findall('字数:[0-9]+?字', text)
-            has_copyright = True
-            if '因版权问题，文库不再提供该小说的在线阅读与下载服务' in text:
-                has_copyright = False
             if len(size) == 0:
                 size = 0
             else:
@@ -96,13 +105,29 @@ class Wenku8:
                 push, follow = p_f[0].split('推 有')
                 push = int(push)
                 follow = int(follow[:-5])
-            # brief = print(re.findall('\[作品简介\][\s\D]*联系管理员', text)[0][8:-7])
-            if bid == 15:
-                # print(re.findall('\[作品简介\][\s\D]*联系管理员', text))
-                # text = Soup(text, 'html.parser').get_text()
-                print(text)
-            brief = re.findall('\[作品简介\][\s\D]*联系管理员', text)[0][8:-7]
-        except IndexError and ValueError as e:
+        except self.NoCopyright:
+            status = '无版权'
+            size = None
+            update = None
+            push = None
+            follow = None
+            has_copyright = False
+            result = {
+                'author': author,
+                'sortlist': sortlist,
+                'status': status,
+                'size': size,
+                'update': update,
+                'push': push,
+                'follow': follow,
+                'brief': brief,
+                'has_copyright': has_copyright,
+            }
+            if callback is not None:
+                callback(result)
+                return None
+            return result
+        except IndexError or ValueError as e:
             print('(bid=%s)Error Occurs:' % bid, e)
             # print('Err TEXT:', text)
             return None

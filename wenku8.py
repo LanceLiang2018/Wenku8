@@ -73,19 +73,32 @@ class Wenku8:
         html = requests.get(url_book_info, cookies=self.cookie).text
         soup = Soup(html, 'html.parser')
         text = soup.getText()
+        # text = text.encode('utf8').decode('gbk', errors='ignore')
+        # text = text.encode('gbk').decode('utf8')
+        # text = text.encode("utf-8").decode('utf-8','ignore')
+        text = text.replace('\r', '').replace('\u3000', '')
+        if '对不起，该文章不存在' in text:
+            return None
         # print(text)
 
+        author = None
+        sortlist = None
+        brief = None
+        title = None
         try:
-            if '因版权问题，文库不再提供该小说的在线阅读与下载服务' in text:
-                raise self.NoCopyright
-            author = soup.find_all('anchor')[0].get_text()
+            # author = soup.find_all('anchor')[0].get_text()
+            title = re.findall('全本\.\n新书\n.+', text)[0][7:]
+            author = re.findall('作者:.+', text)[0][3:].replace('\r', '')
             sortlist = Soup(re.findall('<a href="sortlist.php.+?/>', html)[0], 'html.parser').get_text()
             # brief = print(re.findall('\[作品简介\][\s\D]*联系管理员', text)[0][8:-7])
-            if bid == 15:
-                # print(re.findall('\[作品简介\][\s\D]*联系管理员', text))
-                # text = Soup(text, 'html.parser').get_text()
-                print(text)
-            brief = re.findall('\[作品简介\][\s\D]*联系管理员', text)[0][8:-7]
+            brief = re.findall('\[作品简介\][\s\D]*联系管理员', text)
+            if len(brief) != 0:
+                brief = brief[0][8:-7]
+            else:
+                brief = text.split('[作品简介]')[-1].split('联系管理员')[0]
+                # print("ERR, TRY:", brief)
+            if '因版权问题，文库不再提供该小说的在线阅读与下载服务' in text:
+                raise self.NoCopyright
             has_copyright = True
             status = re.findall('状态:.*', text)[0][3:].replace('\r', '')
             size = re.findall('字数:[0-9]+?字', text)
@@ -113,6 +126,8 @@ class Wenku8:
             follow = None
             has_copyright = False
             result = {
+                'id': bid,
+                'title': title,
                 'author': author,
                 'sortlist': sortlist,
                 'status': status,
@@ -132,6 +147,8 @@ class Wenku8:
             # print('Err TEXT:', text)
             return None
         result = {
+            'id': bid,
+            'title': title,
             'author': author,
             'sortlist': sortlist,
             'status': status,
@@ -152,7 +169,13 @@ class Wenku8:
         html = requests.get(url_fetch_reviews, cookies=self.cookie).text
         soup = Soup(html, 'html.parser')
         text = soup.getText()
-        # print(text)
+        if '对不起，该评论或文章不存在' in text:
+            return None
+        text = text.replace('\r', '')
+        # print(html)
+        review_one = {
+            'username': '', 'content': '', 'time': '',
+        }
 
         try:
             title = re.findall('《.+?》书评', text)[0][1:-3]
@@ -160,14 +183,16 @@ class Wenku8:
             # content = re.findall('<a href="http://www.wenku8.com/wap/userinfo.php.[\s\D]+\]', html)
             # content = re.findall('[0-9]{4}-[0-9]{2}-[0-9]{2}', html)
             content = re.findall('<a href=.+[\s\D]*\[[0-9]{4}-[0-9]{2}-[0-9]{2}\]<br/>', html)
-            review_one = {
-                'username': '', 'content': '', 'time': '',
-            }
+            # print(content)
+
             reviews = []
             for review_html in content:
                 # print('review_html:', review_html)
                 username = re.findall('>.*?</a>', review_html)[0][1:-4]
-                review = re.findall('</a>:\r\n.+[\s\D]*.+?<br/>', review_html)[0]
+                review = re.findall('</a>:\r\n.+[\s\D]*.+?<br/>', review_html)
+                if len(review) == 0:
+                    return None
+                review = review[0]
                 review_content = review[7:-19]
                 # 过滤一下
                 # filters = ['<br />', '<br/>', '\r']
@@ -193,6 +218,7 @@ class Wenku8:
             reviews.extend(appending['reviews'])
 
         result = {
+            'id': rid,
             'title': title,
             'subject': subject,
             'reviews': reviews,
@@ -209,4 +235,4 @@ if __name__ == '__main__':
     wk = Wenku8()
     wk.login()
     # print(wk.fetch_user_info(530523))
-    print(wk.fetch_reviews(331))
+    print(wk.fetch_reviews(119246))

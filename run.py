@@ -9,7 +9,7 @@ max_bid = 2596
 max_uid = 530655
 max_rid = 191767
 
-# MongoDB数据库！
+# MongoDB数据库
 client = pymongo.MongoClient()
 db = client.wenku8
 
@@ -28,6 +28,11 @@ def db_review_info(result: dict):
     db.review.insert_one(result)
 
 
+def db_user_info(result: dict):
+    print(result)
+    db.user.insert_one(result)
+
+
 def get_books_info():
     top = 1
     while top <= max_bid:
@@ -37,11 +42,11 @@ def get_books_info():
             top += 1
             t.setDaemon(True)
             t.start()
-            time.sleep(0.01)
+        time.sleep(0.1)
 
 
 def get_review_info():
-    top = 51912
+    top = 180206
     while top <= max_rid:
         # 先开满进程，发现缺了就补
         while len(threading.enumerate()) < max_thread * 2 and top <= max_rid:
@@ -49,12 +54,25 @@ def get_review_info():
             top += 1
             t.setDaemon(True)
             t.start()
-            time.sleep(0.01)
+        time.sleep(0.1)
+
+
+def get_user_info():
+    top = 331277
+    while top <= max_uid:
+        # 先开满进程，发现缺了就补
+        while len(threading.enumerate()) < max_thread * 2 and top <= max_uid:
+            t = threading.Thread(target=wk.fetch_user_info, args=(top, db_user_info))
+            top += 1
+            t.setDaemon(True)
+            t.start()
+        time.sleep(0.1)
 
 
 def main():
     # get_books_info()
-    get_review_info()
+    # get_review_info()
+    get_user_info()
 
 
 if __name__ == '__main__':

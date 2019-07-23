@@ -13,11 +13,12 @@ class Wenku8:
 
     def __init__(self):
         self.cookie = {}
+        self.user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:68.0) Gecko/20100101 Firefox/68.0'
 
     def login(self, username='LanceTest', password='1352040930'):
         url_login = 'http://www.wenku8.com/wap/login.php'
         payload = {'action': 'login', 'jumpurl': '', 'username': username, 'password': password}
-        response = requests.request("POST", url_login, data=payload)
+        response = requests.request("POST", url_login, data=payload, headers={'User-Agent': self.user_agent})
         # print(response.text)
         if '密码错误' in response.text:
             self.cookie = {}
@@ -33,7 +34,7 @@ class Wenku8:
 
     def fetch_user_info(self, uid: int, callback=None):
         url_user_info = 'http://www.wenku8.com/wap/userinfo.php?id=%s' % uid
-        html = requests.get(url_user_info, cookies=self.cookie)
+        html = requests.get(url_user_info, cookies=self.cookie, headers={'User-Agent': self.user_agent})
         soup = Soup(html.content, 'html.parser')
         text = soup.getText()
         # print(text)
@@ -46,9 +47,13 @@ class Wenku8:
             level = re.findall('等级：.*', text)[0][3:-1]
             sex = re.findall('性别：.*', text)[0][3:-1]
             email = re.findall('邮箱：.*', text)[0][3:-1]
-            qq = int(re.findall('Q Q：[0-9]{5,14}', text)[0][4:])
+            qq = re.findall('Q Q：[0-9]{0,14}', text)[0][4:]
+            if qq == '':
+                qq = 0
+            else:
+                qq = int(qq)
             motto = re.findall('简介：.*', text)[0][3:-1]
-        except ValueError and IndexError as e:
+        except ValueError or IndexError as e:
             print("Error Occurs:", e)
             return None
         result = {
@@ -70,7 +75,7 @@ class Wenku8:
 
     def fetch_book_info(self, bid: int, callback = None):
         url_book_info = 'http://www.wenku8.com/wap/article/articleinfo.php?id=%s' % bid
-        html = requests.get(url_book_info, cookies=self.cookie).text
+        html = requests.get(url_book_info, cookies=self.cookie, headers={'User-Agent': self.user_agent}).text
         soup = Soup(html, 'html.parser')
         text = soup.getText()
         # text = text.encode('utf8').decode('gbk', errors='ignore')
@@ -166,10 +171,11 @@ class Wenku8:
 
     def fetch_reviews(self, rid: int, page: int = 1, appending = None, callback = None):
         url_fetch_reviews = 'http://www.wenku8.com/wap/article/reviewshow.php?rid=%s&page=%s' % (rid, page)
-        html = requests.get(url_fetch_reviews, cookies=self.cookie).text
+        html = requests.get(url_fetch_reviews, cookies=self.cookie, headers={'User-Agent': self.user_agent}).text
         soup = Soup(html, 'html.parser')
         text = soup.getText()
         if '对不起，该评论或文章不存在' in text:
+            print("(rid=%s)ERR: 该评论或文章不存在" % rid)
             return None
         text = text.replace('\r', '')
         # print(html)
@@ -209,7 +215,7 @@ class Wenku8:
             pages = re.findall('到第页跳转<<[ {2}?0-9]+? \[[0-9]+?/[0-9]+?\]', text)[0]
             page_total = int(pages.split('/')[-1][:-1])
             # print(page_total)
-        except IndexError and ValueError as e:
+        except IndexError or ValueError as e:
             print('Error Occur:', e)
             return None
 
@@ -235,4 +241,5 @@ if __name__ == '__main__':
     wk = Wenku8()
     wk.login()
     # print(wk.fetch_user_info(530523))
-    print(wk.fetch_reviews(119246))
+    # print(wk.fetch_reviews(119246))
+    print(wk.fetch_user_info(405019))

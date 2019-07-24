@@ -169,9 +169,68 @@ def count_user_date():
                 break
 
 
+def count_user_date_csv():
+    data = list(db.result_user_date.find({}, {'_id': 0}).sort([('date', 1)]))
+    fp = open('count_user_date.csv', 'w')
+    for d in data:
+        fp.write('%s,%s\n' % (d['date'], d['count']))
+    fp.close()
+
+
+def collect_qq():
+    fp = open('qq.txt', 'w')
+    for d in db.user2.find({'qq': {'$ne': 0}}, {'qq': 1, '_id': 0}):
+        # print(d['qq'])
+        if d['qq'] > 99999:
+            fp.write('%s\n' % d['qq'])
+    fp.close()
+
+
+def collect_email():
+    fp = open('email.txt', 'w')
+    for d in db.user2.find({'email': {'$ne': ''}}, {'email': 1, '_id': 0}):
+        # print(d['qq'])
+        if '@' in d['email']:
+            fp.write('%s\n' % d['email'])
+    fp.close()
+
+
+def collect_motto():
+    fp = open('motto.txt', 'w')
+    for d in db.user2.find({}, {'motto': 1, '_id': 0, 'username': 1}):
+        # print(d)
+        if len(d['motto']) > 0:
+            fp.write('[%s]:%s\n' % (d['motto'], d['email']))
+    fp.close()
+
+
+# sex....????性别是怎么说来着
+def collect_sex():
+    total = db.user2.find({}).count()
+    man = db.user2.find({'sex': '男'}).count()
+    woman = db.user2.find({'sex': '女'}).count()
+    secret = total - man - woman
+    with open('sex.csv', 'w') as fp:
+        data = list(map(lambda x: x/total, [man, woman, secret]))
+        fp.write('男,%s\n女,%s\n保密,%s\n' % (data[0], data[1], data[2]))
+
+
+def points_top(count: int = 1000):
+    with open('points_top_%s.csv' % count, 'w') as fp:
+        data = list(db.user2.find({}, {'points': 1, 'username': 1}).sort([('points', -1)]).limit(count))
+        for d in data:
+            fp.write('%s,%s\n' % (d['username'], d['points']))
+
+
 if __name__ == '__main__':
     # print(list(get_reviews(bid=1)))
     # review2epub_split()
     # user_clean()
     # count_user_date()
-    review2epub_all()
+    # review2epub_all()
+    # count_user_date_csv()
+    # collect_qq()
+    # collect_email()
+    # collect_motto()
+    # collect_sex()
+    points_top(10000)

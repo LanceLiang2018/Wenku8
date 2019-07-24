@@ -75,6 +75,9 @@ def review2epub_all(bid_start=1, bid_stop=2596, order=-1):
     book.add_author(author)
     book.set_cover('cover.jpg', data_cover)
     for bid in range_(bid_start, bid_stop+1, 1):
+        # 这个地方有错误
+        if bid == 1024:
+            continue
         title = bid2book(bid)
         reviews = get_reviews(title=title, order=order)
         if reviews is None:
@@ -100,7 +103,10 @@ def review2epub_all(bid_start=1, bid_stop=2596, order=-1):
     book.add_item(epub.EpubNcx())
     book.add_item(epub.EpubNav())
     book.spine = spine
-    epub.write_epub(os.path.join('reviews/', '%s-%s.epub' % (g_title, author)), book)
+    path = 'reviews/'
+    if bid_start == bid_stop:
+        path = '.'
+    epub.write_epub(os.path.join(path, '%s-%s.epub' % (g_title, author)), book)
 
 
 def review2epub_split():
@@ -167,4 +173,5 @@ if __name__ == '__main__':
     # print(list(get_reviews(bid=1)))
     # review2epub_split()
     # user_clean()
-    count_user_date()
+    # count_user_date()
+    review2epub_all()
